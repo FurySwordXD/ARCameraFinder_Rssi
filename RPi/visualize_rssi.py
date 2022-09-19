@@ -36,7 +36,7 @@ plt.show()
 
 '''
 Excercise 2: Can you think of a better way to find the point where the Pis
-where closest together? We can remove outliers to filter out 'bad' RSSI values
-and still find the location of our pi camera, but what are the implications of 
+where closest together? Can we remove outliers to filter out 'bad' RSSI values
+and still find the location of our pi camera. What are the implications of 
 doing that? Implement your solution below.
 '''
