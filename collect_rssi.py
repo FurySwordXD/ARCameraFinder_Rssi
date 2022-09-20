@@ -20,6 +20,7 @@ class RSSI_Scanner:
                 self.ws = None
                 self.ws_uri = ws_uri
                 self.mac_address = mac_address
+                self.rssi = None
 
                 self.channel_c = 100
                 self.change_freq_channel(self.channel_c) 
@@ -30,15 +31,29 @@ class RSSI_Scanner:
                 t.daemon = True
                 t.start()
 
-                t = Thread(target=self.start_ws)
-                t.daemon = True
-                t.start()
+                #t = Thread(target=self.start_ws)
+                #t.daemon = True
+                #t.start()
+                self.start_ws()
 
         def start_ws(self):
                 asyncio.run(self.connect_ws())
-
+                #loop = asyncio.new_event_loop()
+                #asyncio.set_event_loop(loop)
+                #loop.create_task(self.push_data())
+        
+        async def push_data(self):
+                while True:
+                        if self.rssi != None:
+                                print(f"Sending {str(self.rssi)}")
+                                await self.ws.send(str(self.rssi))
+                                self.rssi = None
+                        await asyncio.sleep(1)
+                
         async def connect_ws(self):
                 self.ws = await connect(self.ws_uri)
+                print("Connected to WS")
+                await self.push_data()
 
         def create_rssi_file(self):
                 """Create and prepare a file for RSSI values"""
@@ -57,7 +72,8 @@ class RSSI_Scanner:
         def method_filter_HTTP(self, pkt):
                 """Save packet addresses and rssi values to file if mac address matches"""
                 missed_count = 0 #Number of missed packets while attempting to write to file
-
+                
+                print(pkt.show())
                 cur_dict = {}
                 cur_dict['mac_1'] = pkt.addr1
                 cur_dict['mac_2'] = pkt.addr2
@@ -75,8 +91,7 @@ class RSSI_Scanner:
                                         writer.writerow(data)
                                         
                                 rssi = cur_dict['rssi']
-                                if self.ws != None:
-                                        self.ws.send(rssi)
+                                self.rssi = rssi
 
                                 print(cur_dict)
 
@@ -90,7 +105,7 @@ if __name__ == "__main__":
         DEV_MAC = "dc:a6:32:33:ae:15"
         rssi_scanner = RSSI_Scanner(mac_address=DEV_MAC, ws_uri="ws://10.193.187.236:8001")
         
-        while True:
-                pass
+        #while True:
+                #pass
         
 
