@@ -3,12 +3,9 @@ from datetime import datetime
 from scapy.all import *
 import subprocess, shlex
 from threading import Thread
-import threading
 
 import asyncio
-from websockets import connect
 import time
-
 
 class RSSI_Scanner:
 	'''
@@ -29,38 +26,16 @@ class RSSI_Scanner:
 
 		t = AsyncSniffer(iface="wlan1", prn=self.method_filter_HTTP, store=0)
 		t.daemon = True
-		t.start()
-
-		#t = Thread(target=self.start_ws)
-		#t.daemon = True
-		#t.start()
-		self.start_ws()
-
-	def start_ws(self):
-		asyncio.run(self.connect_ws())
-		#loop = asyncio.new_event_loop()
-		#asyncio.set_event_loop(loop)
-		#loop.create_task(self.push_data())
+		t.start()		
+	
 	
 	async def push_data(self):
 		while True:
 			if self.rssi != None:
-				print(f"Sending {str(self.rssi)}")
-				await self.ws.send(str(self.rssi))
+				print(f"Sending {str(self.rssi)}")				
 				self.rssi = None
 			await asyncio.sleep(1)
-			
-	async def connect_ws(self):
-		self.ws = await connect(self.ws_uri)
-		print("Connected to WS")
-		await self.push_data()
 
-	def create_rssi_file(self):
-		"""Create and prepare a file for RSSI values"""
-		header = ['date', 'time', 'dest', 'src', 'rssi']
-		with open(self.file_name, 'w', encoding='UTF8') as f:
-			writer = csv.writer(f)
-			writer.writerow(header)
 
 	def change_freq_channel(self, channel_c):
 		"""Change the channel network adapter listens on"""
@@ -103,5 +78,3 @@ class RSSI_Scanner:
 if __name__ == "__main__":
 	DEV_MAC = "dc:a6:32:33:ae:15"
 	rssi_scanner = RSSI_Scanner(mac_address=DEV_MAC, ws_uri="ws://10.193.187.236:8001")
-	
-
