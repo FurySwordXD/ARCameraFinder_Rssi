@@ -10,8 +10,8 @@ class ArenaLocalizer:
         user = None
         for k, v in scene.users.items():            
             if self.username == v.displayName:
-                user = v                
-                break
+                user = v
+                break        
 
         if user != None:
             self.position = { 'x': float(user.data.position.x), 'y': float(user.data.position.y), 'z': float(user.data.position.z) }
@@ -21,7 +21,7 @@ class ArenaLocalizer:
         return None
 
 if __name__ == "__main__":
-    scene = Scene(host='mqtt.arenaxr.org', scene='Test')
+    scene = Scene(host='mqtt.arenaxr.org', scene='spy_camera_finder')
     arena_localizer = ArenaLocalizer(name="Sainath Ganesh")
 
     @scene.run_forever(interval_ms=200) # runs ever 0.2 seconds

@@ -10,7 +10,7 @@ IFACE = "wlan1" #Interface for sniffer
 
 rssi_scanner = RSSIScanner(mac_address=DEV_MAC, channel=CHANNEL_NUM, iface=IFACE)
 
-scene = Scene(host='mqtt.arenaxr.org', scene='spy_camera_finder')
+scene = Scene(host='arenaxr.org', scene='spy_camera_finder')
 path_trace = []
 
 arena_localizer = ArenaLocalizer(name=name)

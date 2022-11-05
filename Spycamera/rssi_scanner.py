@@ -17,9 +17,7 @@ class RSSIScanner:
 		self.rssi = None
 
 		self.channel_c = channel
-		self.change_freq_channel(self.channel_c) 
-		self.file_name = 'rssi.csv' 
-		self.create_rssi_file()     
+		self.change_freq_channel(self.channel_c)		 
 
 		t = AsyncSniffer(iface=iface, prn=self.method_filter_HTTP, store=0)
 		t.daemon = True
@@ -47,7 +45,7 @@ class RSSIScanner:
 		cur_dict['mac_2'] = pkt.addr2
 		cur_dict['rssi'] = pkt.dBm_AntSignal
 
-		if cur_dict['mac_2'] == DEV_MAC:
+		if cur_dict['mac_2'] == self.mac_address:
 			try:
 				date_time = datetime.now().strftime("%d/%m/%Y,%H:%M:%S.%f").split(",")
 				date = date_time[0]
