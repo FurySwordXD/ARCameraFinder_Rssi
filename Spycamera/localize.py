@@ -1,4 +1,3 @@
-from random import randint
 from arena import *
 import json
 
@@ -39,23 +38,42 @@ def find_max_rssi_location(data):
 
     return max_rssi, position, timestamp
 
+@scene.run_once
+def start():
+    ar_marker = Object(
+        object_id='ar-marker', position=(0,0,0), rotation=(-90,0,0), scale=(.15,.15,.15),
+        object_type='gltf-model', url='/store/public/armarker.glb',
+        armarker={'markerid': '0', 'markertype': 'apriltag_36h11', 'size': 150, 'dynamic': False, 'buildable': False},
+        persist=True
+    )
+    camera = Object(
+        object_id='real-camera',        
+        object_type='gltf-model',
+        position=(11.0, 0, -6),
+        scale=Scale(.2, .2, .2),
+        url='store/models/AntiqueCamera.glb',
+        persist=True
+    )
+    scene.add_object(camera)
+    scene.add_object(ar_marker)
+    
 def rescale_value(old_min, old_max, new_min, new_max, value):
     return ((value - old_min) / (old_max - old_min)) * (new_max - new_min) + new_min
 
 @scene.run_forever(interval_ms=5000)
-def start():
+def update():
     global data    
 
     max_rssi, position, timestamp = find_max_rssi_location(data)
     print(f"RSSI max of {max_rssi} was at ({position['x']}, {position['y']}, {position['z']})")    
         
-    camera_position = (position['x'], position['y'] - 0.1, position['z'])
+    camera_position = (position['x'], position['y'], position['z'])
     end_position = tuple(map(lambda i, j: i + j, camera_position, (0,0.2,0)))    
     camera_marker = Object(
         object_id='cam_object',        
         object_type='gltf-model',
         position=camera_position,
-        scale=Scale(10, 10, 10),
+        scale=Scale(15, 15, 15),
         url='store/models/BoomBox.glb',
         persist=True
     )
@@ -77,7 +95,7 @@ def start():
             color=Color(128,128,128),
             path=(coord1, coord2),
             lineWidth=5,            
-            ttl=10 # live for 1 minute
+            ttl=30 # live for 1 minute
         )
         scene.update_object(line)
 
@@ -86,14 +104,14 @@ def start():
             max(map(lambda x: x['rssi'], data)), 
             0, 1, rssi
         )
-        color = int(255*(1-factor))
-        scale = .1*factor
+        color = int(255*(1-factor)) # color the sphere based on rssi intensity; RED - High RSSI, WHITE - LOW RSSI
+        scale = .2*factor # scale the sphere based on rssi intensity; Big - High RSSI, Small - LOW RSSI
         sphere = Sphere(
             object_id=f'sphere_{i}', 
             position=coord1,
             color=Color(255,color,color),
             scale=Scale(scale,scale,scale),
-            ttl=10
+            ttl=30
         )
         scene.update_object(sphere)        
 

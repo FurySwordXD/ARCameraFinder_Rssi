@@ -10,14 +10,12 @@ class RSSIScanner:
 	of the device sending the packets.
 	'''
 	def __init__(self, mac_address, channel, iface = "wlan1"):
-		subprocess.call(['sh', 'monitor_mode.sh'])
-
 		self.ws = None		
 		self.mac_address = mac_address
 		self.rssi = None
 
 		self.channel_c = channel
-		self.change_freq_channel(self.channel_c)		 
+		self.setup_adapter(self.channel_c)
 
 		t = AsyncSniffer(iface=iface, prn=self.method_filter_HTTP, store=0)
 		t.daemon = True
@@ -28,12 +26,18 @@ class RSSIScanner:
 		self.rssi = None
 		return rssi
 
-	def change_freq_channel(self, channel_c):
-		"""Change the channel network adapter listens on"""
-		print('Changing to Channel ', str(channel_c))
-		command = 'sudo iwconfig wlan1 channel ' + str(channel_c)
-		command = shlex.split(command)
-		subprocess.Popen(command, shell=False) 
+	def setup_adapter(self, channel_c):
+		"""Setup and change the channel network adapter listens on"""
+		commands = [
+			"sudo ip link set wlan1 down", 
+			"sudo iw dev wlan1 set type monitor", 
+			"sudo ip link set wlan1 up", 
+			"iw dev",
+			f"sudo iwconfig wlan1 channel {channel_c}"
+		]
+		for command in commands:
+			command = shlex.split(command)
+			subprocess.Popen(command, shell=False)		
 
 	def method_filter_HTTP(self, pkt):
 		"""Save packet addresses and rssi values to file if mac address matches"""
